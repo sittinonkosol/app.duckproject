@@ -1,0 +1,46 @@
+<header class="portal-nav">
+    <div class="portal-nav__inner">
+        <a class="portal-nav__brand" href="/" aria-label="DuckProject หน้าแรก">DuckProject</a>
+        <nav class="portal-nav__links" aria-label="เมนูหลัก">
+            <a class="portal-nav__link{% if portal_nav_active == 'home' %} is-active{% endif %}" href="/"{% if portal_nav_active == 'home' %} aria-current="page"{% endif %}>หน้าหลัก</a>
+            {% if user.is_authenticated %}
+                {% if user.is_staff or user.is_superuser %}
+                <a class="portal-nav__link portal-nav__admin-link{% if portal_nav_active == 'admin' %} is-active{% endif %}" href="/admin/"{% if portal_nav_active == 'admin' %} aria-current="page"{% endif %}>จัดการระบบ</a>
+                {% endif %}
+                <div class="portal-nav__account">
+                    <button class="portal-nav__account-button{% if portal_nav_active == 'profile' %} is-active{% endif %}" type="button" aria-expanded="false" aria-controls="portal-account-menu">
+                        <span class="portal-nav__avatar" aria-hidden="true">{{ user.username|slice:':1'|upper }}</span>
+                        <span class="portal-nav__name">{{ user.username }}</span>
+                        <span class="portal-nav__chevron" aria-hidden="true">⌄</span>
+                    </button>
+                    <div class="portal-nav__menu" id="portal-account-menu" hidden>
+                        <a href="/profile/"{% if portal_nav_active == 'profile' %} aria-current="page"{% endif %}>ข้อมูลส่วนตัว</a>
+                        {% if user.is_staff or user.is_superuser %}<a href="/admin/"{% if portal_nav_active == 'admin' %} aria-current="page"{% endif %}>จัดการระบบ</a>{% endif %}
+                        <form method="post" action="/logout/">{% csrf_token %}<input type="hidden" name="next" value="/"><button type="submit">ออกจากระบบ</button></form>
+                    </div>
+                </div>
+            {% else %}
+                <a class="portal-nav__link{% if portal_nav_active == 'login' %} is-active{% endif %}" href="/login/?next=/"{% if portal_nav_active == 'login' %} aria-current="page"{% endif %}>เข้าสู่ระบบ</a>
+                <a class="portal-nav__link{% if portal_nav_active == 'register' %} is-active{% endif %}" href="/register/"{% if portal_nav_active == 'register' %} aria-current="page"{% endif %}>สมัครสมาชิก</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+<script>
+(() => {
+    const account = document.querySelector('.portal-nav__account');
+    if (!account) return;
+    const button = account.querySelector('.portal-nav__account-button');
+    const menu = account.querySelector('.portal-nav__menu');
+    const close = () => { menu.hidden = true; button.setAttribute('aria-expanded', 'false'); };
+    button.addEventListener('click', () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        button.setAttribute('aria-expanded', String(opening));
+    });
+    document.addEventListener('click', event => { if (!account.contains(event.target)) close(); });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !menu.hidden) { close(); button.focus(); }
+    });
+})();
+</script>

@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+/* Shared colors and fonts for the six core portal pages. App UIs stay independent. */
+:root {
+    --portal-canvas: #f7f5ef;
+    --portal-surface: #fffefa;
+    --portal-surface-soft: #f2eee3;
+    --portal-row: #faf9f5;
+    --portal-hover: #e8e2d5;
+    --portal-ink: #20272b;
+    --portal-muted: #4e585d;
+    --portal-line: #465058;
+    --portal-line-soft: #d2d8d5;
+    --portal-blue: #285cae;
+    --portal-blue-hover: #184784;
+    --portal-gold: #d79b18;
+    --portal-success: #176a48;
+    --portal-danger: #a63730;
+    --portal-font: 'IBM Plex Sans Thai', sans-serif;
+    --portal-display-font: 'Outfit', 'IBM Plex Sans Thai', sans-serif;
+}
+body, button, input, select, textarea { font-family: var(--portal-font); }
+:where(a, button, input, select, textarea):focus-visible { outline: 3px solid var(--portal-gold); outline-offset: 3px; }
+
+/* Every core page renders the same portal navigation. */
+.portal-nav, .portal-nav * { box-sizing: border-box; }
+.portal-nav {
+    position: relative;
+    z-index: 100;
+    flex: 0 0 auto;
+    width: 100%;
+    background: var(--portal-canvas);
+    border-bottom: 1px solid var(--portal-line);
+    color: var(--portal-ink);
+}
+.portal-nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: 1500px;
+    min-height: 80px;
+    margin: 0 auto;
+    padding: 0 4%;
+}
+.portal-nav__brand {
+    flex: none;
+    color: var(--portal-ink);
+    font: 700 32px/1 var(--portal-display-font);
+    letter-spacing: -.035em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.portal-nav__links { display: flex; align-items: center; align-self: stretch; gap: clamp(16px, 2.5vw, 36px); }
+.portal-nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 3px 2px 0;
+    border-bottom: 3px solid transparent;
+    color: var(--portal-ink);
+    font: 600 15px/1.3 var(--portal-font);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.portal-nav__link:hover, .portal-nav__link.is-active { border-bottom-color: var(--portal-gold); }
+.portal-nav__account { position: relative; }
+.portal-nav__account-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 3px 2px 0;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--portal-ink);
+    font: 600 15px/1.3 var(--portal-font);
+    cursor: pointer;
+}
+.portal-nav__account-button:hover, .portal-nav__account-button.is-active { border-bottom-color: var(--portal-gold); }
+.portal-nav__avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--portal-ink);
+    color: var(--portal-canvas);
+    font: 700 16px/1 var(--portal-display-font);
+}
+.portal-nav__name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.portal-nav__chevron { color: var(--portal-muted); font-size: 18px; line-height: 1; }
+.portal-nav__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 101;
+    width: 220px;
+    padding: 6px;
+    border: 1px solid var(--portal-line);
+    background: var(--portal-surface);
+    box-shadow: 0 12px 28px #20272b1c;
+}
+.portal-nav__menu[hidden] { display: none; }
+.portal-nav__menu a, .portal-nav__menu button {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 0;
+    background: transparent;
+    color: var(--portal-ink);
+    font: 500 14px/1.4 var(--portal-font);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+.portal-nav__menu a:hover, .portal-nav__menu button:hover { background: var(--portal-surface-soft); }
+.portal-nav__menu form { margin: 0; }
+.portal-nav__menu input[type="hidden"] { display: none; }
+
+@media (max-width: 700px) {
+    .portal-nav__name { display: none; }
+}
+@media (max-width: 560px) {
+    .portal-nav__inner { flex-wrap: wrap; gap: 0; min-height: 0; padding: 14px 16px 0; }
+    .portal-nav__brand { width: 100%; padding-bottom: 13px; font-size: 26px; }
+    .portal-nav__links { width: 100%; min-height: 48px; justify-content: flex-start; gap: 18px; border-top: 1px solid var(--portal-line-soft); }
+    .portal-nav__link { font-size: 14px; }
+    .portal-nav__account { margin-left: auto; }
+    .portal-nav__account-button { min-height: 42px; font-size: 14px; }
+    .portal-nav__avatar { width: 30px; height: 30px; font-size: 14px; }
+}

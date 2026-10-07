@@ -1,0 +1,2564 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noai, noimageai">
+    <title>จัดการระบบ — DuckProject</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #131b2e;
+            --surface-hover: #1a243d;
+            --surface-card: rgba(19, 27, 46, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(99, 102, 241, 0.5);
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .brand-text h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* User Dropdown Navigation */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .user-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 13.5px;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .user-dropdown-btn:hover, .user-dropdown-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .user-dropdown-btn .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            flex-shrink: 0;
+        }
+
+        .dropdown-chevron {
+            font-size: 9px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .user-dropdown-btn.active .dropdown-chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 220px;
+            background: rgba(19, 27, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 1000;
+            animation: dropdownFadeIn 0.2s ease-out;
+        }
+
+        .dropdown-menu.show {
+            display: flex;
+        }
+
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+        }
+
+        .user-avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-meta {
+            overflow: hidden;
+        }
+
+        .user-meta-name {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-meta-role {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: #cbd5e1;
+            text-decoration: none;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .dropdown-item-danger {
+            color: #f87171;
+        }
+
+        .dropdown-item-danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        .stat-info .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .stat-info .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        /* Tab Navigation */
+        .tabs-header {
+            display: flex;
+            gap: 8px;
+            background: rgba(19, 27, 46, 0.6);
+            border: 1px solid var(--border);
+            padding: 6px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Content Sections */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table & Card Panels */
+        .panel {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 260px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 8px 14px 8px 36px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 13.5px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-primary { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-gray { background: rgba(255, 255, 255, 0.06); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .role-pill {
+            display: inline-block;
+            font-size: 11.5px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 2px;
+        }
+        .role-admin { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .role-moderator { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .role-viewer { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .role-none { background: rgba(255, 255, 255, 0.05); color: #64748b; }
+
+        /* Group Members Display Styling */
+        .members-cell-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .members-pill-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .badge-members-more {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px dashed rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .badge-members-more:hover {
+            background: rgba(99, 102, 241, 0.35);
+            border-color: #6366f1;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .members-scrollbox {
+            max-height: 140px;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px 10px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            margin-top: 4px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .members-scrollbox::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .members-scrollbox::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .members-scrollbox::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* App Cards Grid */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .app-manage-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .app-manage-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .app-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .app-card-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-card-icon {
+            font-size: 28px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-card-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .app-card-info .app-route {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .app-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13.5px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--primary-gradient);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        select.custom-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        select.custom-select option {
+            background: #1e293b;
+            color: #fff;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .admin-readonly .admin-write-only {
+            display: none !important;
+        }
+
+        .modal-box {
+            background: #161f36;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.25s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-close:hover { color: #fff; }
+
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 13.5px;
+            color: #cbd5e1;
+        }
+
+        .checkbox-group input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .perm-matrix {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .perm-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13.5px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 200;
+            animation: toastIn 0.3s ease-out;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-dim);
+        }
+        .empty-state span { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100vw;
+            }
+            .navbar {
+                padding: 12px 16px;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .brand-text h1 { font-size: 14px; }
+            .brand-text span { font-size: 11px; }
+            .user-dropdown-btn {
+                padding: 6px 11px;
+                font-size: 12.5px;
+                gap: 6px;
+            }
+            .dropdown-menu {
+                right: 0;
+                width: 210px;
+            }
+            .container {
+                padding: 16px 12px 60px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .tabs-header {
+                flex-wrap: nowrap;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px;
+                justify-content: flex-start;
+                border: none;
+                background: transparent;
+            }
+            .tabs-header::-webkit-scrollbar {
+                height: 4px;
+            }
+            .tabs-header::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.15);
+                border-radius: 4px;
+            }
+            .hide-mobile {
+                display: none !important;
+            }
+            .tab-btn {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                background: rgba(19, 27, 46, 0.6);
+                border: 1px solid var(--border);
+            }
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+                gap: 12px;
+            }
+            .panel-header > div {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .search-box {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .search-box input {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .panel-header .btn {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .modal-box {
+                width: 92%;
+                margin: 20px auto;
+            }
+            th, td {
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="{% static 'core/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'core/workspace.css' %}">
+</head>
+<body class="admin-page {% if not user.is_superuser %}admin-readonly{% endif %}">
+    {% include 'core/_portal_nav.html' with portal_nav_active='admin' %}
+
+    <div class="container">
+        {% if not user.is_superuser %}<p style="margin:12px 0;color:var(--text-muted);">โหมดดูข้อมูล: เฉพาะ Superuser เปลี่ยนผู้ใช้ กลุ่ม และการตั้งค่าแอปได้</p>{% endif %}
+        <!-- Stats Summary -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
+                    <div class="stat-value" id="stat-total-users">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">กลุ่มผู้ใช้</div>
+                    <div class="stat-value" id="stat-total-groups">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">แอปพลิเคชันในระบบ</div>
+                    <div class="stat-value" id="stat-total-apps">{{ installed_apps|length }}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">แอปสาธารณะ</div>
+                    <div class="stat-value" id="stat-public-apps">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation Bar -->
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('tab-users', this)" aria-pressed="true">ผู้ใช้งาน</button>
+            <button class="tab-btn" onclick="switchTab('tab-groups', this)" aria-pressed="false">กลุ่มผู้ใช้</button>
+            <button class="tab-btn" onclick="switchTab('tab-apps', this)" aria-pressed="false">สิทธิ์แอป</button>
+            <button class="tab-btn" onclick="switchTab('tab-logs', this)" aria-pressed="false">ประวัติเข้าสู่ระบบ</button>
+            <button class="tab-btn" id="pending-tab-btn" onclick="switchTab('tab-pending', this)" aria-pressed="false" style="position:relative;">รอการอนุมัติ<span id="pending-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--portal-danger);color:#fff;border-radius:50%;min-width:20px;height:20px;font-size:0.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;">0</span></button>
+        </div>
+
+        <!-- TAB 1: USERS -->
+        <div id="tab-users" class="tab-content active">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>รายชื่อผู้ใช้งานทั้งหมด</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div class="search-box">
+                            <input type="search" id="user-search-input" placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล" aria-label="ค้นหาผู้ใช้" oninput="filterUsers()">
+                        </div>
+                        <button class="btn btn-primary admin-write-only" onclick="openUserModal()">+ เพิ่มผู้ใช้ใหม่</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ผู้ใช้งาน</th>
+                                <th>สถานะ / สิทธิ์ระบบ</th>
+                                <th>กลุ่ม</th>
+                                <th>สิทธิ์ที่มีผลในแอป</th>
+                                <th>เข้าสู่ระบบล่าสุด</th>
+                                <th style="text-align: right;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;flex-wrap:wrap;">
+                    <span id="users-page-status" aria-live="polite"></span>
+                    <div style="display:flex;gap:8px;">
+                        <button type="button" class="btn btn-ghost btn-sm" id="users-prev" onclick="changeUserPage(-1)">ก่อนหน้า</button>
+                        <button type="button" class="btn btn-ghost btn-sm" id="users-next" onclick="changeUserPage(1)">ถัดไป</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: GROUPS -->
+        <div id="tab-groups" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>กลุ่มผู้ใช้งานและบทบาท</span>
+                    </div>
+                    <button class="btn btn-primary admin-write-only" onclick="openGroupModal()">+ สร้างกลุ่มใหม่</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ชื่อกลุ่ม</th>
+                                <th>จำนวนสมาชิก</th>
+                                <th>สมาชิกในกลุ่ม</th>
+                                <th>สิทธิ์ตั้งต้นของกลุ่มในแต่ละแอป</th>
+                                <th style="text-align: right;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groups-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: APP ACCESS & VISIBILITY -->
+        <div id="tab-apps" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>การเข้าถึงแอปและสิทธิ์ขั้นต่ำ</span>
+                    </div>
+                </div>
+                <div class="apps-grid" id="apps-grid-container">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: LOGIN LOGS -->
+        <div id="tab-logs" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>ประวัติการเข้าสู่ระบบ (Login Logs)</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div class="search-box">
+                            <span class="search-icon"></span>
+                            <input type="text" id="log-search-input" placeholder="ค้นหาชื่อผู้ใช้, IP..." oninput="loadLoginLogs()">
+                        </div>
+                        <select class="custom-select" id="log-status-filter" onchange="loadLoginLogs()">
+                            <option value="">ทั้งหมด (All Status)</option>
+                            <option value="success">เข้าสู่ระบบสำเร็จ (Success)</option>
+                            <option value="failed">เข้าสู่ระบบไม่สำเร็จ (Failed)</option>
+                        </select>
+                        <button class="btn btn-ghost btn-sm" onclick="loadLoginLogs()"> รีเฟรช</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>สถานะ</th>
+                                <th>ชื่อผู้ใช้ที่ระบุ</th>
+                                <th>IP Address</th>
+                                <th>วันเวลาที่ทำรายการ</th>
+                                <th>อุปกรณ์ / เบราว์เซอร์</th>
+                                <th>หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: PENDING REGISTRATIONS -->
+        <div id="tab-pending" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>คำขอลงทะเบียนรอการอนุมัติ</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <button class="btn btn-ghost btn-sm" onclick="loadPendingRegistrations()"> รีเฟรช</button>
+                    </div>
+                </div>
+                <p style="padding:0 20px 12px;color:var(--text-muted);font-size:13px;">รายการนี้แสดงเฉพาะผู้ที่สมัครผ่านหน้าเว็บ บัญชีที่ปิดใช้งานให้ตรวจในแท็บผู้ใช้งาน</p>
+                <div id="pending-empty" style="display:none; padding: 3rem; text-align: center; color: var(--text-muted);">
+                    <div style="font-size:2.5rem; margin-bottom:0.75rem;"></div>
+                    <p style="font-size:1rem; font-weight:600; color: var(--text-main); margin-bottom:0.3rem;">ไม่มีคำขอที่รอการอนุมัติ</p>
+                    <p style="font-size:0.875rem;">ผู้ใช้ทุกคนได้รับการอนุมัติแล้ว</p>
+                </div>
+                <div class="table-responsive" id="pending-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อผู้ใช้ (Username)</th>
+                                <th>อีเมล</th>
+                                <th>วันที่สมัคร</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- USER LOGIN LOGS MODAL -->
+    <div class="modal-overlay" id="user-logs-modal" role="dialog" aria-modal="true" aria-labelledby="user-logs-modal-title">
+        <div class="modal-box" style="max-width: 720px;">
+            <div class="modal-header">
+                <h2 id="user-logs-modal-title">ประวัติการเข้าสู่ระบบ</h2>
+                <button class="modal-close" onclick="closeModal('user-logs-modal')">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>สถานะ</th>
+                                <th>IP Address</th>
+                                <th>วันเวลา</th>
+                                <th>อุปกรณ์ / เบราว์เซอร์</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-logs-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('user-logs-modal')">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER MODAL (ADD / EDIT) -->
+    <div class="modal-overlay" id="user-modal" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="user-modal-title">เพิ่มผู้ใช้ใหม่</h2>
+                <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
+            </div>
+            <form id="user-form" onsubmit="saveUser(event)">
+                <input type="hidden" id="user-id">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ชื่อผู้ใช้ (Username) *</label>
+                            <input type="text" id="user-username" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label id="user-password-label">รหัสผ่าน (Password) *</label>
+                            <input type="password" id="user-password" class="form-control" placeholder="••••••••">
+                            <small id="user-password-hint" style="color:var(--text-dim); font-size:11.5px; display:none;">(เว้นว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน)</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ชื่อจริง (First Name)</label>
+                            <input type="text" id="user-firstname" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>นามสกุล (Last Name)</label>
+                            <input type="text" id="user-lastname" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>อีเมล (Email)</label>
+                        <input type="email" id="user-email" class="form-control" placeholder="user@example.com">
+                    </div>
+
+                    <div style="display: flex; gap: 20px; margin: 4px 0; flex-wrap: wrap;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="user-is-active" checked>
+                            <span>เปิดใช้งานบัญชี (Active)</span>
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="user-is-staff" {% if not user.is_superuser %}disabled{% endif %}>
+                            <span>ผู้ดูแลระบบ (Staff Access)</span>
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="user-is-superuser" onchange="toggleSuperuserAppPermissions()" {% if not user.is_superuser %}disabled{% endif %}>
+                            <span style="color:#805500; font-weight:700;">Superadmin</span>
+                        </label>
+                    </div>
+                    {% if not user.is_superuser %}<p style="font-size:13px;color:var(--text-muted);">เฉพาะ Superuser เท่านั้นที่แต่งตั้งผู้ดูแลระบบได้</p>{% endif %}
+
+                    <div id="superuser-perm-notice" style="display:none; margin-top:8px; padding:10px 14px; background:var(--portal-surface-soft); border:1px solid var(--portal-gold); border-radius:8px; font-size:12.5px; color:var(--portal-ink);">
+                        <strong>Superadmin</strong> จะได้รับสิทธิ์ <strong>Admin สูงสุดในทุกแอปพลิเคชันโดยอัตโนมัติ</strong> และไม่สามารถถูกปรับลดสิทธิ์ได้
+                    </div>
+
+                    <div class="form-group" style="margin-top:12px;">
+                        <label>กลุ่มผู้ใช้ (Groups)</label>
+                        <div id="user-groups-container" style="display: flex; flex-wrap: wrap; gap: 10px; background: var(--portal-surface-soft); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>กำหนดระดับสิทธิ์เฉพาะในแต่ละแอป (Per-App Permissions)</label>
+                        <div class="perm-matrix" id="user-perm-matrix">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('user-modal')">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="save-user-btn">บันทึกข้อมูลผู้ใช้</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GROUP MODAL (ADD / EDIT) -->
+    <div class="modal-overlay" id="group-modal" role="dialog" aria-modal="true" aria-labelledby="group-modal-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="group-modal-title">สร้างกลุ่มใหม่</h2>
+                <button class="modal-close" onclick="closeModal('group-modal')">✕</button>
+            </div>
+            <form id="group-form" onsubmit="saveGroup(event)">
+                <input type="hidden" id="group-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>ชื่อกลุ่ม (Group Name) *</label>
+                        <input type="text" id="group-name" class="form-control" required placeholder="เช่น ทีมผู้ตรวจข้อสอบ, ผู้บริหาร">
+                    </div>
+
+                    <div class="form-group">
+                        <label>กำหนดสิทธิ์เริ่มต้นของกลุ่มในแต่ละแอป</label>
+                        <div class="perm-matrix" id="group-perm-matrix">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>เลือกสมาชิกในกลุ่มนี้</label>
+                        <input type="text" id="group-member-search" placeholder=" ค้นหารหัสนักศึกษา / ชื่อ..." oninput="filterGroupModalMembers(this.value)" class="form-control" style="margin-bottom: 6px; padding: 6px 10px; background: #fff; color: var(--portal-ink);">
+                        <div id="group-members-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; background: var(--portal-surface-soft); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('group-modal')">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="save-group-btn">บันทึกกลุ่ม</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP ICON MODAL -->
+    <div class="modal-overlay" id="app-icon-modal" role="dialog" aria-modal="true" aria-labelledby="app-icon-modal-title">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="app-icon-modal-title">เปลี่ยนไอคอนแอป</h2>
+                <button class="modal-close" onclick="closeModal('app-icon-modal')">✕</button>
+            </div>
+
+            <!-- Modal Tabs -->
+            <div style="display: flex; gap: 8px; margin: 16px 20px 0; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <button type="button" class="btn btn-sm" id="icon-tab-emoji-btn" onclick="switchIconMode('emoji')" style="background: var(--primary-gradient); color: #fff;">เลือกอีโมจิ</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="icon-tab-upload-btn" onclick="switchIconMode('upload')">อัปโหลดรูปภาพ (PNG/JPG/SVG)</button>
+            </div>
+
+            <!-- TAB 1: EMOJI / TEXT -->
+            <form id="app-icon-emoji-form" onsubmit="saveAppIcon(event)">
+                <input type="hidden" id="app-icon-target-name">
+                <div class="modal-body" id="icon-panel-emoji">
+                    <div class="icon-preview-panel">
+                        <div id="app-icon-preview" class="icon-preview">
+                            🚀
+                        </div>
+                        <div class="icon-preview-hint">ตัวอย่างการแสดงผลไอคอน</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>พิมพ์ไอคอน หรือเลือกจากด้านล่าง *</label>
+                        <input type="text" id="app-icon-input" class="form-control" maxlength="50" placeholder="เช่น 🦆 หรือ 🚀 หรือ 🎮" oninput="updateIconPreview(this.value)" style="font-size: 18px; text-align: center;">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">ไอคอนยอดนิยม (กดเลือกได้ทันที):</label>
+                        <div class="icon-preset-grid">
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🦆')">🦆</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🚀')">🚀</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🎮')">🎮</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('📱')">📱</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('📊')">📊</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('📝')">📝</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🧩')">🧩</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('⚙️')">⚙️</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🌐')">🌐</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🔒')">🔒</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('📦')">📦</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('💻')">💻</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🎨')">🎨</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🎓')">🎓</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('⚡')">⚡</button>
+                            <button type="button" class="btn btn-ghost" style="padding: 6px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="selectIconPreset('🔍')">🔍</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" id="icon-footer-emoji">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('app-icon-modal')">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="save-app-icon-btn">บันทึกอีโมจิ</button>
+                </div>
+            </form>
+
+            <!-- TAB 2: UPLOAD IMAGE -->
+            <form id="app-icon-upload-form" onsubmit="uploadAppIconFile(event)" style="display: none;">
+                <div class="modal-body" id="icon-panel-upload">
+                    <div class="icon-preview-panel">
+                        <div id="app-icon-upload-preview" class="icon-preview">
+                            เลือกรูปภาพ
+                        </div>
+                        <div class="icon-preview-hint" id="app-icon-upload-hint">ตัวอย่างรูปภาพที่เลือก</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>เลือกไฟล์รูปภาพ (PNG, JPG, SVG, WebP) *</label>
+                        <input type="file" id="app-icon-file-input" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif" class="form-control" onchange="previewUploadedFile(event)" style="padding: 8px;">
+                        <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 6px;">ขนาดไฟล์สูงสุด 5 MB (แนะนำรูปภาพ PNG พื้นหลังโปร่งใส)</div>
+                    </div>
+                </div>
+                <div class="modal-footer" id="icon-footer-upload">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('app-icon-modal')">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="upload-app-icon-btn">อัปโหลดและบันทึกรูปภาพ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let allUsers = [];
+        let allGroups = [];
+        let allApps = [];
+        let usersOffset = 0;
+        let usersTotal = 0;
+        let usersOverallTotal = 0;
+        let userSearchTimer;
+        let userRequestId = 0;
+        let modalTrigger = null;
+        const usersPageSize = 50;
+        const canManageSystemRoles = {% if user.is_superuser %}true{% else %}false{% endif %};
+
+        function userListUrl(offset = usersOffset, search = document.getElementById('user-search-input').value.trim()) {
+            const params = new URLSearchParams({ limit: usersPageSize, offset });
+            if (search) params.set('search', search);
+            return `/api/admin/users?${params}`;
+        }
+
+        async function loadUsersPage() {
+            const requestId = ++userRequestId;
+            try {
+                const data = await safeFetchJson(userListUrl());
+                if (requestId !== userRequestId) return;
+                if (data.total && usersOffset >= data.total) {
+                    usersOffset = Math.floor((data.total - 1) / usersPageSize) * usersPageSize;
+                    return loadUsersPage();
+                }
+                allUsers = data.users || [];
+                usersTotal = data.total || 0;
+                usersOverallTotal = data.overall_total || 0;
+                updateStats();
+                renderUsersTable();
+                renderUserPagination();
+            } catch (err) {
+                showToast(err.message || 'โหลดรายชื่อผู้ใช้ไม่สำเร็จ', true);
+            }
+        }
+
+        function renderUserPagination() {
+            const start = usersTotal ? usersOffset + 1 : 0;
+            const end = Math.min(usersOffset + allUsers.length, usersTotal);
+            document.getElementById('users-page-status').textContent = `แสดง ${start}–${end} จาก ${usersTotal} คน`;
+            document.getElementById('users-prev').disabled = usersOffset === 0;
+            document.getElementById('users-next').disabled = usersOffset + usersPageSize >= usersTotal;
+        }
+
+        function changeUserPage(direction) {
+            usersOffset = Math.max(0, usersOffset + direction * usersPageSize);
+            loadUsersPage();
+        }
+
+        // Tab Switching
+        function switchTab(tabId, activeButton) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            activeButton.classList.add('active');
+            activeButton.setAttribute('aria-pressed', 'true');
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'tab-logs') {
+                loadLoginLogs();
+            }
+            if (tabId === 'tab-pending') {
+                loadPendingRegistrations();
+            }
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            modalTrigger = document.activeElement;
+            const modal = document.getElementById(id);
+            modal.classList.add('open');
+            modal.querySelector('input:not([type="hidden"]):not([disabled]), button:not([disabled])')?.focus();
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            modalTrigger?.focus();
+            modalTrigger = null;
+        }
+
+        document.addEventListener('keydown', event => {
+            const modal = document.querySelector('.modal-overlay.open');
+            if (!modal) return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeModal(modal.id);
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(modal.querySelectorAll('button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), a[href]'))
+                .filter(element => element.getClientRects().length);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+
+        // Toast Feedback
+        function showToast(msg, isError = false) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.setAttribute('role', isError ? 'alert' : 'status');
+            t.style.borderColor = isError ? 'var(--danger)' : 'var(--success)';
+            t.innerHTML = `<span>${isError ? '' : ''}</span><span>${escapeHtml(msg)}</span>`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3200);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function jsArg(value) {
+            return escapeHtml(JSON.stringify(String(value ?? '')));
+        }
+
+        function formatAppIcon(icon, size = '20px') {
+            const sz = typeof size === 'number' ? `${size}px` : (size || '20px');
+            if (!icon) icon = '🚀';
+            const isImage = typeof icon === 'string' && (
+                icon.startsWith('/media/') ||
+                icon.startsWith('http://') ||
+                icon.startsWith('https://') ||
+                icon.startsWith('data:')
+            );
+            if (isImage) {
+                return `<img src="${escapeHtml(icon)}" alt="" style="width:${sz}; height:${sz}; object-fit:contain; border-radius:4px; vertical-align:middle; display:inline-block;">`;
+            }
+            return `<span style="font-size:${sz}; line-height:1; vertical-align:middle; display:inline-flex; align-items:center; justify-content:center;">${escapeHtml(icon)}</span>`;
+        }
+
+        // --- CSRF Token Helper ---
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                c = c.trim();
+                if (c.startsWith(name + '=')) {
+                    return decodeURIComponent(c.slice(name.length + 1));
+                }
+            }
+            // Fallback: read from hidden input if cookie unavailable
+            const el = document.querySelector('[name=csrfmiddlewaretoken]');
+            return el ? el.value : '';
+        }
+
+        // --- Safe JSON Fetcher (auto-injects CSRF token for mutating requests) ---
+        async function safeFetchJson(url, options = {}) {
+            const method = (options.method || 'GET').toUpperCase();
+            const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+            if (mutating) {
+                options.headers = options.headers || {};
+                options.headers['X-CSRFToken'] = getCsrfToken();
+            }
+            const res = await fetch(url, options);
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                if (res.status === 401 || res.status === 403 || res.redirected) {
+                    window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
+                    throw new Error('กรุณาเข้าสู่ระบบก่อนทำรายการ');
+                }
+                throw new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ${res.status})`);
+            }
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || `เกิดข้อผิดพลาด (${res.status})`);
+            }
+            return data;
+        }
+
+        // --- Data Fetching ---
+        async function loadAllData() {
+            try {
+                ++userRequestId;
+                let [usersData, groupsData, appsData] = await Promise.all([
+                    safeFetchJson(userListUrl()),
+                    safeFetchJson('/api/admin/groups'),
+                    safeFetchJson('/api/admin/app-settings')
+                ]);
+                if (usersData.total && usersOffset >= usersData.total) {
+                    usersOffset = Math.floor((usersData.total - 1) / usersPageSize) * usersPageSize;
+                    usersData = await safeFetchJson(userListUrl());
+                }
+
+                allUsers = usersData.users || [];
+                usersTotal = usersData.total || 0;
+                usersOverallTotal = usersData.overall_total || 0;
+                allGroups = groupsData.groups || [];
+                allApps = appsData.apps || [];
+
+                updateStats();
+                renderUsersTable();
+                renderUserPagination();
+                renderGroupsTable();
+                renderAppsGrid();
+                loadPendingRegistrations(); // Load pending count on init
+            } catch (err) {
+                console.error('Error loading data', err);
+                showToast(err.message || 'โหลดข้อมูลระบบไม่สำเร็จ', true);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-users').textContent = usersOverallTotal;
+            document.getElementById('stat-total-groups').textContent = allGroups.length;
+            document.getElementById('stat-total-apps').textContent = allApps.length;
+            const publicCount = allApps.filter(a => a.is_public && a.min_role_required === 'viewer').length;
+            document.getElementById('stat-public-apps').textContent = publicCount;
+        }
+
+        function effectiveAppRole(user, app) {
+            if (user.is_superuser) return 'admin';
+            const direct = user.app_permissions[app.app_name];
+            if (direct === 'none') return 'none';
+            const levels = { none: 0, viewer: 1, moderator: 2, admin: 3 };
+            let role = app.is_public ? 'viewer' : 'none';
+            if (direct && levels[direct] > levels[role]) role = direct;
+            user.groups.forEach(membership => {
+                const group = allGroups.find(item => item.id === membership.id);
+                const groupRole = group?.app_permissions[app.app_name];
+                if (groupRole && levels[groupRole] > levels[role]) role = groupRole;
+            });
+            return role;
+        }
+
+        // --- Render Users ---
+        function renderUsersTable(filtered = null) {
+            const list = filtered || allUsers;
+            const tbody = document.getElementById('users-table-body');
+            
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><span></span>ไม่พบข้อมูลผู้ใช้งาน</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(u => {
+                const groupsHtml = u.groups.length > 0 
+                    ? u.groups.map(g => `<span class="badge badge-primary">${escapeHtml(g.name)}</span>`).join(' ') 
+                    : '<span style="color:var(--text-dim); font-size:12px;">-</span>';
+
+                let permsHtml = '';
+                if (u.is_superuser) {
+                    permsHtml = '<span class="role-pill role-admin" style="font-weight:700; background:rgba(245,158,11,0.2); border-color:#d79b18; color:#805500;">Superadmin</span>';
+                } else {
+                    allApps.forEach(a => {
+                        const role = effectiveAppRole(u, a);
+                        let roleClass = 'role-viewer';
+                        let roleLabel = 'ดู/เล่นได้';
+                        if (role === 'admin') { roleClass = 'role-admin'; roleLabel = 'ผู้ดูแลแอป'; }
+                        else if (role === 'moderator') { roleClass = 'role-moderator'; roleLabel = 'จัดการกิจกรรม'; }
+                        else if (role === 'none') { roleClass = 'role-none'; roleLabel = 'ไม่มีสิทธิ์'; }
+                        const levels = { none: 0, viewer: 1, moderator: 2, admin: 3 };
+                        if (levels[role] < levels[a.min_role_required || 'viewer']) {
+                            roleClass = 'role-none';
+                            roleLabel = 'เข้าไม่ได้';
+                        }
+
+                        permsHtml += `<span class="role-pill ${roleClass}">${formatAppIcon(a.icon, '14px')} ${escapeHtml(a.name)}: ${roleLabel}</span>`;
+                    });
+                }
+
+                const statusBadge = u.is_active 
+                    ? '<span class="badge badge-success">Active</span>' 
+                    : '<span class="badge badge-danger">Disabled</span>';
+                
+                const adminBadge = u.is_superuser 
+                    ? '<span class="badge badge-warning">Superuser</span>' 
+                    : (u.is_staff ? '<span class="badge badge-primary">Staff</span>' : '');
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--portal-ink);">${escapeHtml(u.username)}</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">${escapeHtml(u.first_name || '')} ${escapeHtml(u.last_name || '')} (${escapeHtml(u.email || 'ไม่มีอีเมล')})</div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                ${statusBadge}
+                                ${adminBadge}
+                            </div>
+                        </td>
+                        <td>${groupsHtml}</td>
+                        <td>${permsHtml}</td>
+                        <td class="mono" style="font-size: 13px; color: var(--text-dim);">${escapeHtml(u.last_login)}</td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <button class="btn btn-ghost btn-sm" onclick="viewUserLogs(${u.id}, ${jsArg(u.username)})">ประวัติ</button>
+                                ${canManageSystemRoles ? `<button class="btn btn-ghost btn-sm" onclick="editUser(${u.id})">แก้ไข</button>` : ''}
+                                ${canManageSystemRoles ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, ${jsArg(u.username)})">ลบ</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // --- Login Logs Handlers ---
+        async function loadLoginLogs() {
+            const search = document.getElementById('log-search-input')?.value.trim() || '';
+            const status = document.getElementById('log-status-filter')?.value || '';
+            const tbody = document.getElementById('logs-table-body');
+            if (!tbody) return;
+
+            let url = `/api/admin/login-logs?limit=100`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (status) url += `&status=${encodeURIComponent(status)}`;
+
+            try {
+                const data = await safeFetchJson(url);
+                const logs = data.logs || [];
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><span></span>ไม่พบประวัติการเข้าสู่ระบบ</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(l => {
+                    const isSuccess = l.status === 'success';
+                    const badge = isSuccess
+                        ? '<span class="badge badge-success">✓ สำเร็จ</span>'
+                        : '<span class="badge badge-danger">✕ ไม่สำเร็จ</span>';
+                    return `
+                        <tr>
+                            <td>${badge}</td>
+                            <td><strong style="color:var(--portal-ink);">${escapeHtml(l.username)}</strong></td>
+                            <td class="mono" style="font-size:12.5px; color:var(--portal-muted);">${escapeHtml(l.ip_address)}</td>
+                            <td class="mono" style="font-size:12px; color:var(--text-dim);">${escapeHtml(l.timestamp)}</td>
+                            <td style="font-size:12px; color:var(--text-muted); max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(l.user_agent)}">${escapeHtml(l.user_agent)}</td>
+                            <td style="font-size:12px; color:#fca5a5;">${escapeHtml(l.failure_reason)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--danger);">เกิดข้อผิดพลาดในการดึงข้อมูลประวัติ</td></tr>`;
+            }
+        }
+
+        async function viewUserLogs(userId, username) {
+            document.getElementById('user-logs-modal-title').textContent = `ประวัติการเข้าสู่ระบบของ: ${username}`;
+            const tbody = document.getElementById('user-logs-table-body');
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-dim);">กำลังโหลด...</td></tr>`;
+            openModal('user-logs-modal');
+
+            try {
+                const data = await safeFetchJson(`/api/admin/users/${userId}/login-logs`);
+                const logs = data.logs || [];
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-state" style="padding:24px;"><span></span>ยังไม่มีประวัติการเข้าสู่ระบบ</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(l => {
+                    const isSuccess = l.status === 'success';
+                    const badge = isSuccess
+                        ? '<span class="badge badge-success">✓ สำเร็จ</span>'
+                        : '<span class="badge badge-danger">✕ ไม่สำเร็จ</span>';
+                    return `
+                        <tr>
+                            <td>${badge}</td>
+                            <td class="mono" style="font-size:12.5px;">${escapeHtml(l.ip_address)}</td>
+                            <td class="mono" style="font-size:12px; color:var(--text-dim);">${escapeHtml(l.timestamp)}</td>
+                            <td style="font-size:12px; color:var(--text-muted); max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(l.user_agent)}">${escapeHtml(l.user_agent)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state" style="color:var(--danger); padding:20px;">โหลดข้อมูลไม่สำเร็จ</td></tr>`;
+            }
+        }
+
+        function filterUsers() {
+            clearTimeout(userSearchTimer);
+            usersOffset = 0;
+            userSearchTimer = setTimeout(loadUsersPage, 250);
+        }
+
+        // --- Render Groups ---
+        function toggleGroupMembers(groupId) {
+            const hiddenBox = document.getElementById(`members-hidden-${groupId}`);
+            const btn = document.getElementById(`members-btn-${groupId}`);
+            if (!hiddenBox) return;
+            const isHidden = hiddenBox.classList.contains('hidden');
+            if (isHidden) {
+                hiddenBox.classList.remove('hidden');
+                if (btn) btn.innerHTML = '▲ ซ่อน';
+            } else {
+                hiddenBox.classList.add('hidden');
+                const count = hiddenBox.getAttribute('data-count') || '';
+                if (btn) btn.innerHTML = `+${count} คน (ดูทั้งหมด)`;
+            }
+        }
+
+        function toggleGroupPerms(groupId) {
+            const hiddenBox = document.getElementById(`perms-hidden-${groupId}`);
+            const btn = document.getElementById(`perms-btn-${groupId}`);
+            if (!hiddenBox) return;
+            const isHidden = hiddenBox.classList.contains('hidden');
+            if (isHidden) {
+                hiddenBox.classList.remove('hidden');
+                if (btn) btn.innerHTML = '▲ ซ่อนแอปที่ไม่ได้ตั้งค่า';
+            } else {
+                hiddenBox.classList.add('hidden');
+                const count = hiddenBox.getAttribute('data-count') || '';
+                if (btn) btn.innerHTML = `+${count} แอป (ไม่ได้ตั้งค่า)`;
+            }
+        }
+
+        function renderGroupsTable() {
+            const tbody = document.getElementById('groups-table-body');
+            if (allGroups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><span></span>ยังไม่มีกลุ่มผู้ใช้งาน</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allGroups.map(g => {
+                const members = g.members || [];
+                let membersHtml = '';
+
+                if (members.length === 0) {
+                    membersHtml = '<span style="color:var(--text-dim); font-size:12px;">ไม่มีสมาชิก</span>';
+                } else if (members.length <= 6) {
+                    membersHtml = `<div class="members-pill-box">` + 
+                        members.map(m => `<span class="badge badge-primary">${escapeHtml(m.username)}</span>`).join('') + 
+                        `</div>`;
+                } else {
+                    const visibleMembers = members.slice(0, 6);
+                    const hiddenMembers = members.slice(6);
+                    membersHtml = `
+                        <div class="members-cell-wrapper">
+                            <div class="members-pill-box">
+                                ${visibleMembers.map(m => `<span class="badge badge-primary">${escapeHtml(m.username)}</span>`).join('')}
+                                <span class="badge-members-more" id="members-btn-${g.id}" onclick="toggleGroupMembers(${g.id})">+${hiddenMembers.length} คน (ดูทั้งหมด)</span>
+                            </div>
+                            <div class="members-scrollbox hidden" id="members-hidden-${g.id}" data-count="${hiddenMembers.length}">
+                                ${hiddenMembers.map(m => `<span class="badge badge-primary">${escapeHtml(m.username)}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let visiblePerms = [];
+                let hiddenPerms = [];
+
+                allApps.forEach(a => {
+                    const role = g.app_permissions[a.app_name] || 'none';
+                    let roleClass = 'role-none';
+                    let roleLabel = 'ไม่มีสิทธิ์';
+                    if (role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
+                    else if (role === 'moderator') { roleClass = 'role-moderator'; roleLabel = 'Moderator'; }
+                    else if (role === 'viewer') { roleClass = 'role-viewer'; roleLabel = 'Viewer'; }
+
+                    const pillHtml = `<span class="role-pill ${roleClass}">${formatAppIcon(a.icon, '16px')} ${escapeHtml(a.name)}: ${roleLabel}</span>`;
+                    
+                    if (role === 'none') {
+                        hiddenPerms.push(pillHtml);
+                    } else {
+                        visiblePerms.push(pillHtml);
+                    }
+                });
+
+                let permsHtml = `<div class="members-cell-wrapper"><div class="members-pill-box">${visiblePerms.join('')}`;
+                
+                if (hiddenPerms.length > 0) {
+                    permsHtml += `
+                            <span class="badge-members-more" id="perms-btn-${g.id}" onclick="toggleGroupPerms(${g.id})">+${hiddenPerms.length} แอป (ไม่ได้ตั้งค่า)</span>
+                        </div>
+                        <div class="members-scrollbox hidden" id="perms-hidden-${g.id}" data-count="${hiddenPerms.length}">
+                            ${hiddenPerms.join('')}
+                        </div>
+                    </div>`;
+                } else {
+                    permsHtml += `</div></div>`;
+                }
+
+                if (visiblePerms.length === 0 && hiddenPerms.length === 0) {
+                    permsHtml = '<span style="color:var(--text-dim); font-size:12px;">ไม่ได้กำหนดสิทธิ์</span>';
+                }
+
+                return `
+                    <tr>
+                        <td><strong style="color:var(--portal-ink); font-size:15px;">${escapeHtml(g.name)}</strong></td>
+                        <td><span class="badge badge-gray">${g.member_count} คน</span></td>
+                        <td style="max-width: 480px;">${membersHtml}</td>
+                        <td>${permsHtml}</td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                ${canManageSystemRoles ? `<button class="btn btn-ghost btn-sm" onclick="editGroup(${g.id})">แก้ไข</button>` : ''}
+                                ${canManageSystemRoles ? `<button class="btn btn-danger btn-sm" onclick="deleteGroup(${g.id}, ${jsArg(g.name)})">ลบ</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // --- Render Apps ---
+        function renderAppsGrid() {
+            const container = document.getElementById('apps-grid-container');
+            if (allApps.length === 0) {
+                container.innerHTML = `<div class="empty-state">ไม่พบแอปพลิเคชันในระบบ</div>`;
+                return;
+            }
+
+            container.innerHTML = allApps.map(a => {
+                return `
+                    <div class="app-manage-card" data-app="${a.app_name}">
+                        <div class="app-card-top">
+                            <div class="app-card-info">
+                                <div class="app-card-icon" style="display:flex; align-items:center; justify-content:center; overflow:hidden;" >
+                                    ${formatAppIcon(a.icon, '38px')}
+                                </div>
+                                <div>
+                                    <h3>${escapeHtml(a.name)}</h3>
+                                    <div class="app-route mono">${a.url}</div>
+                                </div>
+                            </div>
+                            <span class="badge ${a.is_public && a.min_role_required === 'viewer' ? 'badge-success' : 'badge-danger'}">
+                                ${a.is_public && a.min_role_required === 'viewer' ? 'ทุกคนเข้าได้' : 'เฉพาะผู้มีสิทธิ์'}
+                            </span>
+                        </div>
+
+                        <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">${escapeHtml(a.description)}</p>
+
+                        <div class="app-control-group admin-write-only">
+                            <div class="control-row">
+                                <div>
+                                    <strong>ไอคอนแอป (App Icon)</strong>
+                                    <div style="font-size:13px; color:var(--text-dim);">เลือกอีโมจิ หรืออัปโหลดรูปภาพ PNG/JPG</div>
+                                </div>
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="openAppIconModal(${jsArg(a.app_name)}, ${jsArg(a.icon || '')}, ${jsArg(a.name)})" style="display:flex; align-items:center; gap:8px;">
+                                    <span>${formatAppIcon(a.icon, '20px')}</span>
+                                    <span>เปลี่ยนไอคอน</span>
+                                </button>
+                            </div>
+
+                            <div class="control-row">
+                                <div>
+                                    <strong>การเปิดเป็นสาธารณะ (Public)</strong>
+                                    <div style="font-size:11.5px; color:var(--text-dim);">ทุกคนเข้าได้เมื่อเปิดค่านี้และสิทธิ์ขั้นต่ำเป็น Viewer; หากปิดต้องเข้าสู่ระบบและได้รับสิทธิ์</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-public-${a.app_name}" ${a.is_public ? 'checked' : ''} onchange="updateAppPublic('${a.app_name}', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="control-row">
+                                <div>
+                                    <strong>ระดับสิทธิ์ขั้นต่ำที่เข้าได้</strong>
+                                    <div style="font-size:11.5px; color:var(--text-dim);">ใช้กับหน้าแอปและ API ทั้งหมด</div>
+                                </div>
+                                <select class="custom-select" id="min-role-${a.app_name}" onchange="updateAppMinRole('${a.app_name}', this.value)">
+                                    <option value="viewer" ${a.min_role_required === 'viewer' ? 'selected' : ''}>Viewer (ทั่วไป)</option>
+                                    <option value="moderator" ${a.min_role_required === 'moderator' ? 'selected' : ''}>Moderator (จัดการข้อมูล)</option>
+                                    <option value="admin" ${a.min_role_required === 'admin' ? 'selected' : ''}>Admin (ผู้ดูแลแอป)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                            <a href="${a.url}" target="_blank" class="btn btn-ghost btn-sm">เปิดแอปนี้</a>
+                            <span style="font-size:12px; color:var(--text-dim);">ตั้งค่ามีผลทันที</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- App Settings Handlers ---
+        function openAppIconModal(appName, currentIcon, displayName) {
+            document.getElementById('app-icon-target-name').value = appName;
+            document.getElementById('app-icon-modal-title').textContent = `เปลี่ยนไอคอนแอป: ${displayName || appName}`;
+            document.getElementById('app-icon-file-input').value = '';
+            document.getElementById('app-icon-upload-hint').textContent = 'ตัวอย่างรูปภาพที่เลือก';
+            
+            const isImage = currentIcon && (currentIcon.startsWith('/media/') || currentIcon.startsWith('http') || currentIcon.startsWith('data:'));
+            
+            if (isImage) {
+                switchIconMode('upload');
+                document.getElementById('app-icon-upload-preview').innerHTML = `<img src="${escapeHtml(currentIcon)}" style="width:100%; height:100%; object-fit:contain;">`;
+                document.getElementById('app-icon-input').value = '';
+                document.getElementById('app-icon-preview').textContent = '🚀';
+            } else {
+                switchIconMode('emoji');
+                document.getElementById('app-icon-input').value = currentIcon || '🚀';
+                updateIconPreview(currentIcon || '🚀');
+                document.getElementById('app-icon-upload-preview').textContent = 'เลือกรูปภาพ';
+            }
+
+            openModal('app-icon-modal');
+        }
+
+        function switchIconMode(mode) {
+            const emojiForm = document.getElementById('app-icon-emoji-form');
+            const uploadForm = document.getElementById('app-icon-upload-form');
+            const emojiBtn = document.getElementById('icon-tab-emoji-btn');
+            const uploadBtn = document.getElementById('icon-tab-upload-btn');
+
+            if (mode === 'upload') {
+                emojiForm.style.display = 'none';
+                uploadForm.style.display = 'block';
+                uploadBtn.style.background = 'var(--primary-gradient)';
+                uploadBtn.style.color = '#fff';
+                uploadBtn.classList.remove('btn-ghost');
+                emojiBtn.style.background = 'transparent';
+                emojiBtn.style.color = 'var(--text-muted)';
+                emojiBtn.classList.add('btn-ghost');
+            } else {
+                emojiForm.style.display = 'block';
+                uploadForm.style.display = 'none';
+                emojiBtn.style.background = 'var(--primary-gradient)';
+                emojiBtn.style.color = '#fff';
+                emojiBtn.classList.remove('btn-ghost');
+                uploadBtn.style.background = 'transparent';
+                uploadBtn.style.color = 'var(--text-muted)';
+                uploadBtn.classList.add('btn-ghost');
+            }
+        }
+
+        function previewUploadedFile(event) {
+            const file = event.target.files[0];
+            const previewContainer = document.getElementById('app-icon-upload-preview');
+            const hint = document.getElementById('app-icon-upload-hint');
+
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('ขนาดไฟล์เกิน 5 MB', true);
+                    event.target.value = '';
+                    previewContainer.textContent = 'ไฟล์ใหญ่เกิน';
+                    hint.textContent = 'ขนาดไฟล์สูงสุด 5 MB';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:contain;">`;
+                    hint.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function uploadAppIconFile(e) {
+            e.preventDefault();
+            const appName = document.getElementById('app-icon-target-name').value;
+            const fileInput = document.getElementById('app-icon-file-input');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast('กรุณาเลือกไฟล์รูปภาพก่อน', true);
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('icon_file', file);
+
+            const btn = document.getElementById('upload-app-icon-btn');
+            btn.disabled = true;
+            btn.textContent = 'กำลังอัปโหลด...';
+
+            try {
+                const res = await fetch(`/api/admin/app-settings/${appName}/upload-icon`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCsrfToken() },
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || 'อัปโหลดไม่สำเร็จ');
+                }
+                showToast(`อัปโหลดรูปภาพไอคอนสำหรับ "${appName}" สำเร็จ`);
+                closeModal('app-icon-modal');
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'อัปโหลดรูปภาพไม่สำเร็จ', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'อัปโหลดและบันทึกรูปภาพ';
+            }
+        }
+
+        function selectIconPreset(icon) {
+            document.getElementById('app-icon-input').value = icon;
+            updateIconPreview(icon);
+        }
+
+        function updateIconPreview(icon) {
+            const previewEl = document.getElementById('app-icon-preview');
+            if (icon && (icon.startsWith('/media/') || icon.startsWith('http') || icon.startsWith('data:'))) {
+                previewEl.innerHTML = `<img src="${escapeHtml(icon)}" style="width:100%; height:100%; object-fit:contain; border-radius:18px;">`;
+            } else {
+                previewEl.textContent = icon || '🚀';
+            }
+        }
+
+        async function saveAppIcon(e) {
+            e.preventDefault();
+            const appName = document.getElementById('app-icon-target-name').value;
+            const newIcon = document.getElementById('app-icon-input').value.trim() || '🚀';
+            const btn = document.getElementById('save-app-icon-btn');
+            btn.disabled = true;
+            btn.textContent = 'กำลังบันทึก...';
+
+            try {
+                await safeFetchJson(`/api/admin/app-settings/${appName}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ icon: newIcon })
+                });
+                showToast(`เปลี่ยนไอคอนแอป "${appName}" เรียบร้อยแล้ว`);
+                closeModal('app-icon-modal');
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'บันทึกไอคอนไม่สำเร็จ', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'บันทึกอีโมจิ';
+            }
+        }
+
+        async function updateAppPublic(appName, isPublic) {
+            try {
+                await safeFetchJson(`/api/admin/app-settings/${appName}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_public: isPublic })
+                });
+                showToast(`บันทึกสถานะของ ${appName} เรียบร้อย`);
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'บันทึกไม่สำเร็จ', true);
+            }
+        }
+
+        async function updateAppMinRole(appName, minRole) {
+            try {
+                await safeFetchJson(`/api/admin/app-settings/${appName}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ min_role_required: minRole })
+                });
+                showToast(`อัปเดตสิทธิ์ขั้นต่ำของ ${appName} เรียบร้อย`);
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'บันทึกไม่สำเร็จ', true);
+            }
+        }
+
+        // --- Superuser Permission Locker ---
+        function toggleSuperuserAppPermissions() {
+            const isSuper = document.getElementById('user-is-superuser').checked;
+            const selects = document.querySelectorAll('#user-perm-matrix select');
+            const notice = document.getElementById('superuser-perm-notice');
+            const staffCheckbox = document.getElementById('user-is-staff');
+            
+            if (isSuper) {
+                staffCheckbox.checked = true;
+                staffCheckbox.disabled = true;
+                if (notice) notice.style.display = 'block';
+                selects.forEach(s => {
+                    s.value = 'admin';
+                    s.disabled = true;
+                    s.style.opacity = '0.6';
+                });
+            } else {
+                staffCheckbox.disabled = !canManageSystemRoles;
+                if (notice) notice.style.display = 'none';
+                selects.forEach(s => {
+                    s.disabled = false;
+                    s.style.opacity = '1';
+                });
+            }
+        }
+
+        // --- User Modal & CRUD ---
+        function openUserModal(user = null) {
+            document.getElementById('user-id').value = user ? user.id : '';
+            document.getElementById('user-modal-title').textContent = user ? `แก้ไขผู้ใช้: ${user.username}` : 'เพิ่มผู้ใช้ใหม่';
+            document.getElementById('user-username').value = user ? user.username : '';
+            document.getElementById('user-username').readOnly = false;
+            document.getElementById('user-firstname').value = user ? user.first_name : '';
+            document.getElementById('user-lastname').value = user ? user.last_name : '';
+            document.getElementById('user-email').value = user ? user.email : '';
+            document.getElementById('user-is-active').checked = user ? user.is_active : true;
+            document.getElementById('user-is-staff').checked = user ? (user.is_staff || user.is_superuser) : false;
+            document.getElementById('user-is-superuser').checked = user ? user.is_superuser : false;
+
+            const pwdInput = document.getElementById('user-password');
+            const pwdLabel = document.getElementById('user-password-label');
+            const pwdHint = document.getElementById('user-password-hint');
+
+            if (user) {
+                pwdInput.required = false;
+                pwdInput.value = '';
+                pwdLabel.textContent = 'รหัสผ่านใหม่ (หากต้องการเปลี่ยน)';
+                pwdHint.style.display = 'block';
+            } else {
+                pwdInput.required = true;
+                pwdInput.value = '';
+                pwdLabel.textContent = 'รหัสผ่าน (Password) *';
+                pwdHint.style.display = 'none';
+            }
+
+            // Render groups checkboxes
+            const groupsContainer = document.getElementById('user-groups-container');
+            const userGroupIds = user ? (user.groups.map(g => typeof g === 'object' ? g.id : g)) : [];
+            groupsContainer.innerHTML = allGroups.map(g => `
+                <label class="checkbox-group">
+                    <input type="checkbox" name="user-group-select" value="${g.id}" ${userGroupIds.includes(g.id) ? 'checked' : ''}>
+                    <span>${escapeHtml(g.name)}</span>
+                </label>
+            `).join('') || '<span style="color:var(--text-dim); font-size:12px;">ยังไม่มีกลุ่มในระบบ</span>';
+
+            // Render app permissions matrix
+            const permContainer = document.getElementById('user-perm-matrix');
+            permContainer.innerHTML = allApps.map(a => {
+                const currentRole = user && user.app_permissions ? (user.app_permissions[a.app_name] || 'default') : 'default';
+                return `
+                    <div class="perm-row">
+                        <span style="display:flex; align-items:center; gap:8px;">${formatAppIcon(a.icon, '18px')} <strong>${escapeHtml(a.name)}</strong></span>
+                        <select class="custom-select" name="user-perm-${a.app_name}">
+                            <option value="default" ${currentRole === 'default' ? 'selected' : ''}>ตามกลุ่ม / ค่าเริ่มต้น</option>
+                            <option value="viewer" ${currentRole === 'viewer' ? 'selected' : ''}>Viewer (ดู/เล่นได้)</option>
+                            <option value="moderator" ${currentRole === 'moderator' ? 'selected' : ''}>Moderator (จัดการข้อมูล)</option>
+                            <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>Admin (ผู้ดูแลแอป)</option>
+                            <option value="none" ${currentRole === 'none' ? 'selected' : ''}>No Access (ปิดกั้นการเข้า)</option>
+                        </select>
+                    </div>
+                `;
+            }).join('');
+
+            toggleSuperuserAppPermissions();
+            openModal('user-modal');
+        }
+
+        async function editUser(userId) {
+            try {
+                const user = await safeFetchJson(`/api/admin/users/${userId}`);
+                openUserModal(user);
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'ดึงข้อมูลผู้ใช้ไม่สำเร็จ', true);
+            }
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('user-id').value;
+            const username = document.getElementById('user-username').value.trim();
+            const password = document.getElementById('user-password').value;
+            const first_name = document.getElementById('user-firstname').value.trim();
+            const last_name = document.getElementById('user-lastname').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+            const is_active = document.getElementById('user-is-active').checked;
+            const is_superuser = document.getElementById('user-is-superuser').checked;
+            const is_staff = is_superuser || document.getElementById('user-is-staff').checked;
+
+            const selectedGroups = Array.from(document.querySelectorAll('input[name="user-group-select"]:checked'))
+                .map(cb => parseInt(cb.value));
+
+            const app_permissions = {};
+            if (!is_superuser) {
+                allApps.forEach(a => {
+                    const role = document.querySelector(`select[name="user-perm-${a.app_name}"]`).value;
+                    if (role !== 'default') {
+                        app_permissions[a.app_name] = role;
+                    }
+                });
+            }
+
+            const payload = {
+                username,
+                first_name,
+                last_name,
+                email,
+                is_active,
+                is_staff,
+                is_superuser,
+                groups: selectedGroups,
+                app_permissions
+            };
+            if (password) payload.password = password;
+
+            const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                await safeFetchJson(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                closeModal('user-modal');
+                showToast(id ? 'แก้ไขข้อมูลผู้ใช้เรียบร้อย' : 'เพิ่มผู้ใช้ใหม่เรียบร้อย');
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'บันทึกไม่สำเร็จ', true);
+            }
+        }
+
+        async function deleteUser(userId, username) {
+            if (!confirm(`คุณต้องการลบผู้ใช้ "${username}" ออกจากระบบถาวรหรือไม่?`)) return;
+            try {
+                await safeFetchJson(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                showToast(`ลบผู้ใช้ "${username}" เรียบร้อย`);
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'ลบไม่สำเร็จ', true);
+            }
+        }
+
+        function filterGroupModalMembers(q) {
+            const term = q.toLowerCase().trim();
+            const container = document.getElementById('group-members-container');
+            if (!container) return;
+            const labels = container.querySelectorAll('.checkbox-group');
+            labels.forEach(lbl => {
+                const text = lbl.textContent.toLowerCase();
+                lbl.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        }
+
+        // --- Group Modal & CRUD ---
+        async function openGroupModal(group = null) {
+            let groupUsers = [];
+            try {
+                let offset = 0;
+                let total = 0;
+                do {
+                    const data = await safeFetchJson(`/api/admin/users?limit=500&offset=${offset}`);
+                    groupUsers.push(...(data.users || []));
+                    total = data.total || 0;
+                    offset += data.users.length;
+                } while (offset < total && offset > 0);
+            } catch (err) {
+                showToast(err.message || 'โหลดรายชื่อสมาชิกไม่สำเร็จ', true);
+                return;
+            }
+            document.getElementById('group-id').value = group ? group.id : '';
+            document.getElementById('group-modal-title').textContent = group ? `แก้ไขกลุ่ม: ${group.name}` : 'สร้างกลุ่มใหม่';
+            document.getElementById('group-name').value = group ? group.name : '';
+
+            const searchInput = document.getElementById('group-member-search');
+            if (searchInput) searchInput.value = '';
+
+            // Group Members Checkboxes
+            const membersContainer = document.getElementById('group-members-container');
+            const groupMemberIds = group ? group.members : [];
+            membersContainer.innerHTML = groupUsers.map(u => `
+                <label class="checkbox-group">
+                    <input type="checkbox" name="group-member-select" value="${u.id}" ${groupMemberIds.includes(u.id) ? 'checked' : ''}>
+                    <span>${escapeHtml(u.username)} (${escapeHtml(u.first_name || '')} ${escapeHtml(u.last_name || '')})</span>
+                </label>
+            `).join('') || '<span style="color:var(--text-dim); font-size:12px;">ไม่มีผู้ใช้ในระบบ</span>';
+
+            // Group App Permissions
+            const permContainer = document.getElementById('group-perm-matrix');
+            permContainer.innerHTML = allApps.map(a => {
+                const currentRole = group && group.app_permissions ? (group.app_permissions[a.app_name] || 'none') : 'none';
+                return `
+                    <div class="perm-row">
+                        <span style="display:flex; align-items:center; gap:8px;">${formatAppIcon(a.icon, '18px')} <strong>${escapeHtml(a.name)}</strong></span>
+                        <select class="custom-select" name="group-perm-${a.app_name}">
+                            <option value="viewer" ${currentRole === 'viewer' ? 'selected' : ''}>Viewer (ดู/เล่นได้)</option>
+                            <option value="moderator" ${currentRole === 'moderator' ? 'selected' : ''}>Moderator (จัดการข้อมูล)</option>
+                            <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>Admin (ผู้ดูแลแอป)</option>
+                            <option value="none" ${currentRole === 'none' ? 'selected' : ''}>ไม่ให้สิทธิ์ผ่านกลุ่มนี้</option>
+                        </select>
+                    </div>
+                `;
+            }).join('');
+
+            openModal('group-modal');
+        }
+
+        async function editGroup(groupId) {
+            try {
+                const group = await safeFetchJson(`/api/admin/groups/${groupId}`);
+                openGroupModal(group);
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'ดึงข้อมูลกลุ่มไม่สำเร็จ', true);
+            }
+        }
+
+        async function saveGroup(e) {
+            e.preventDefault();
+            const id = document.getElementById('group-id').value;
+            const name = document.getElementById('group-name').value.trim();
+
+            const selectedMembers = Array.from(document.querySelectorAll('input[name="group-member-select"]:checked'))
+                .map(cb => parseInt(cb.value));
+
+            const app_permissions = {};
+            allApps.forEach(a => {
+                const role = document.querySelector(`select[name="group-perm-${a.app_name}"]`).value;
+                app_permissions[a.app_name] = role;
+            });
+
+            const payload = {
+                name,
+                members: selectedMembers,
+                app_permissions
+            };
+
+            const url = id ? `/api/admin/groups/${id}` : '/api/admin/groups';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                await safeFetchJson(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                closeModal('group-modal');
+                showToast(id ? 'แก้ไขกลุ่มเรียบร้อย' : 'สร้างกลุ่มใหม่เรียบร้อย');
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'บันทึกไม่สำเร็จ', true);
+            }
+        }
+
+        async function deleteGroup(groupId, groupName) {
+            if (!confirm(`คุณต้องการลบกลุ่ม "${groupName}" ออกจากระบบหรือไม่?`)) return;
+            try {
+                await safeFetchJson(`/api/admin/groups/${groupId}`, { method: 'DELETE' });
+                showToast(`ลบกลุ่ม "${groupName}" เรียบร้อย`);
+                loadAllData();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'ลบไม่สำเร็จ', true);
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadAllData);
+
+        // ─── Pending Registrations ───────────────────────────────────────
+        async function loadPendingRegistrations() {
+            try {
+                const data = await safeFetchJson('/api/admin/registrations/pending');
+                const list = data.pending || [];
+                const count = data.count || 0;
+
+                // Update badge
+                const badge = document.getElementById('pending-badge');
+                if (badge) {
+                    badge.textContent = count;
+                    badge.style.display = count > 0 ? 'inline-flex' : 'none';
+                }
+
+                // Update table
+                const tbody = document.getElementById('pending-table-body');
+                const emptyDiv = document.getElementById('pending-empty');
+                const tableWrap = document.getElementById('pending-table-wrap');
+                if (!tbody) return;
+
+                if (list.length === 0) {
+                    if (emptyDiv) emptyDiv.style.display = 'block';
+                    if (tableWrap) tableWrap.style.display = 'none';
+                    return;
+                }
+
+                if (emptyDiv) emptyDiv.style.display = 'none';
+                if (tableWrap) tableWrap.style.display = '';
+
+                tbody.innerHTML = list.map(u => `
+                    <tr id="pending-row-${u.id}">
+                        <td class="mono">#${u.id}</td>
+                        <td><strong>${escapeHtml(u.username)}</strong></td>
+                        <td>${escapeHtml(u.email) || '<span style="color:var(--text-dim)">-</span>'}</td>
+                        <td><span style="color:var(--text-muted); font-size:0.85rem;">${escapeHtml(u.date_joined)}</span></td>
+                        <td>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                ${canManageSystemRoles ? `
+                                <button class="btn btn-sm" style="background:var(--success);color:#fff;border:none;padding:5px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;"
+                                    onclick="approveRegistration(${u.id}, ${jsArg(u.username)})">
+                                    ✓ อนุมัติ
+                                </button>
+                                <button class="btn btn-sm" style="background:var(--danger);color:#fff;border:none;padding:5px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;"
+                                    onclick="rejectRegistration(${u.id}, ${jsArg(u.username)})">
+                                    ✕ ปฏิเสธ
+                                </button>` : '<span>ดูข้อมูลได้เท่านั้น</span>'}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('loadPendingRegistrations error', err);
+            }
+        }
+
+        async function approveRegistration(userId, username) {
+            if (!confirm(`อนุมัติการลงทะเบียนของ "${username}" และเปิดใช้งานบัญชีนี้?`)) return;
+            try {
+                await safeFetchJson(`/api/admin/registrations/${userId}/approve`, { method: 'POST' });
+                showToast(`อนุมัติบัญชี "${username}" เรียบร้อยแล้ว`);
+                loadPendingRegistrations();
+                loadAllData(); // refresh user list too
+            } catch (err) {
+                showToast(err.message || 'อนุมัติไม่สำเร็จ', true);
+            }
+        }
+
+        async function rejectRegistration(userId, username) {
+            if (!confirm(`ปฏิเสธและลบคำขอลงทะเบียนของ "${username}"?\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+            try {
+                await safeFetchJson(`/api/admin/registrations/${userId}/reject`, { method: 'DELETE' });
+                showToast(`ปฏิเสธและลบบัญชี "${username}" เรียบร้อยแล้ว`);
+                loadPendingRegistrations();
+            } catch (err) {
+                showToast(err.message || 'ลบไม่สำเร็จ', true);
+            }
+        }
+    </script>
+</body>
+</html>

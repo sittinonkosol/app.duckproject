@@ -1,0 +1,12 @@
+* { font-family: var(--portal-font); }
+body { background: var(--portal-canvas); color: var(--portal-ink); }
+body.portal-auth-page { flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 0; }
+body.portal-auth-page .denied-card { margin: auto; width: min(100% - 32px, 460px); }
+.denied-card { background: var(--portal-surface); border: 1px solid var(--portal-line); border-left: 9px solid var(--portal-gold); border-radius: 0; backdrop-filter: none; box-shadow: none; animation: none; }
+.denied-card h1 { color: var(--portal-ink); }
+.denied-card p,.badge-info { color: var(--portal-muted); }
+.btn-primary { background: var(--portal-blue); border-color: var(--portal-blue); border-radius: 3px; }
+.btn-primary:hover { background: var(--portal-blue-hover); }
+.btn-ghost { background: #fff; border-color: var(--portal-line); color: var(--portal-ink); border-radius: 3px; }
+.btn-ghost:hover { background: var(--portal-surface-soft); color: var(--portal-ink); }
+:where(a,button):focus-visible { outline: 3px solid var(--portal-gold); outline-offset: 3px; }

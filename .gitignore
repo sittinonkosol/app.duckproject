@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Databases
+*.sqlite3
+*.db
+
+# Logs & OS files
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Database backups
+*backup*.json
+*backup*.sql
+*dump*.sql
+
+# Temporary / Server runtime
+.runtime/
+media/
+staticfiles/
+.temp/
+cache/
+libraries/
+versions/
+*_copy.html
+
+# Local design tooling and rejected mockup variants
+.impeccable/
+.agents/skills/impeccable/
+.impeccable/config.local.json
+.impeccable/mocks/decision/canon.png*
+.impeccable/mocks/decision/model-pick.png*
+.impeccable/mocks/decision/challenger-manual-tabs.png*
+
+# Private development artifacts
+docs/
+log.md
+scratch/
+security_audit_report.pdf

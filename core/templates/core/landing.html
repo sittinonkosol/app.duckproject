@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noai, noimageai">
+    <title>DuckProject — เลือกแอป</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="{% static 'core/theme.css' %}">
+    <style>
+        :root { --paper:var(--portal-canvas); --ink:var(--portal-ink); --muted:var(--portal-muted); --line:var(--portal-line); --gold:var(--portal-gold); --blue:var(--portal-blue); }
+        * { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--portal-font); }
+        a,button { -webkit-tap-highlight-color:transparent; }
+        a:focus-visible,button:focus-visible { outline:3px solid var(--gold); outline-offset:4px; }
+        .main { max-width:1500px; margin:0 auto; padding:66px 4% 120px; }
+        .intro { margin-bottom:34px; }
+        .intro h1 { margin:0; font-size:clamp(38px,5.8vw,76px); line-height:1.2; font-weight:700; letter-spacing:-.045em; }
+        .intro p { max-width:720px; margin:8px 0 0; color:var(--muted); font-size:clamp(16px,1.8vw,20px); line-height:1.6; }
+        .app-list { display:grid; gap:24px; }
+        .app-row { position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:24px; min-height:172px; padding:26px 30px 26px 34px; border:1px solid var(--line); color:var(--ink); text-decoration:none; background:var(--portal-row); transition:background .18s,border-color .18s; }
+        .app-row::before { content:''; position:absolute; inset:-1px auto -1px -1px; width:19px; background:var(--gold); }
+        .app-row:hover { background:#fff; border-color:var(--blue); }
+        .app-info { display:flex; align-items:center; gap:24px; min-width:0; }
+        .logo-box { flex:none; width:76px; height:76px; display:grid; place-items:center; background:var(--portal-surface-soft); border:1px solid var(--portal-line-soft); }
+        .app-logo { width:58px; height:58px; object-fit:contain; }
+        .app-icon { font-size:44px; line-height:1; }
+        .app-copy { min-width:0; }
+        .app-copy h2 { margin:0 0 4px; font:700 clamp(27px,3vw,42px)/1.2 var(--portal-display-font); letter-spacing:-.025em; }
+        .app-copy p { margin:0; color:var(--ink); font-size:clamp(15px,1.7vw,20px); line-height:1.5; }
+        .access-label { display:block; margin-top:7px; color:var(--muted); font-size:13px; }
+        .open-button { display:grid; place-items:center; min-width:190px; min-height:64px; padding:12px 24px; background:var(--blue); color:#fff; font-size:20px; font-weight:700; white-space:nowrap; transition:background .18s; }
+        .app-row:hover .open-button { background:var(--portal-blue-hover); }
+        .empty-state { padding:28px; border:1px solid var(--line); font-size:18px; }
+        @media(max-width:700px) {
+            .main { padding-top:44px; padding-bottom:80px; }
+            .intro { margin-bottom:26px; }
+            .app-list { gap:16px; }
+            .app-row { grid-template-columns:1fr; gap:16px; padding:20px 18px 20px 28px; min-height:0; }
+            .app-row::before { width:9px; }
+            .app-info { gap:15px; align-items:flex-start; }
+            .logo-box { width:58px; height:58px; }
+            .app-logo { width:44px; height:44px; }
+            .app-icon { font-size:34px; }
+            .open-button { min-width:0; min-height:48px; width:100%; font-size:16px; }
+        }
+        @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
+    </style>
+</head>
+<body>
+    {% include 'core/_portal_nav.html' with portal_nav_active='home' %}
+    <main class="main">
+        <div class="intro">
+            <h1>เลือกแอปที่ต้องการใช้</h1>
+            <p>DuckProject รวมเครื่องมือสำหรับกิจกรรมและโปรเจกต์ต่าง ๆ เลือกแอปที่ต้องการแล้วเริ่มใช้งานได้เลย</p>
+        </div>
+        <div class="app-list">
+            {% for app in apps %}
+            <a href="{{ app.url }}" class="app-row" aria-label="เปิด {{ app.name }}">
+                <div class="app-info">
+                    <span class="logo-box" aria-hidden="true">
+                        {% if app.icon|slice:':7' == '/media/' or app.icon|slice:':8' == 'https://' or app.icon|slice:':7' == 'http://' or app.icon|slice:':5' == 'data:' or app.icon|slice:':8' == '/static/' %}
+                        <img class="app-logo" src="{{ app.icon }}" alt="">
+                        {% else %}<span class="app-icon">{{ app.icon }}</span>{% endif %}
+                    </span>
+                    <div class="app-copy">
+                        <h2>{{ app.name }}</h2>
+                        <p>{{ app.description }}</p>
+                        {% if not app.is_public %}<span class="access-label">ต้องเข้าสู่ระบบก่อนใช้งาน</span>{% endif %}
+                    </div>
+                </div>
+                <span class="open-button">เปิดแอป</span>
+            </a>
+            {% empty %}
+            <div class="empty-state">ยังไม่มีแอปที่เปิดใช้งานในขณะนี้</div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
